@@ -63,9 +63,9 @@ $MSPN_HOME
 |   |-- SELF
 |   |   |-- det_json
 |   |   |-- gt_json
-|   |       |-- train.json
-|   |       |-- valid.json
-|   |
+|   |   |   |-- train.json
+|   |   |   |-- valid.json
+|   |   |
 |   |   |-- images
 |   |       |-- train
 |   |       |-- val
