@@ -8,6 +8,9 @@ import os, getpass
 import os.path as osp
 import argparse
 
+import sys
+sys.path.append("/home/cui/MSPN/MSPN_HOME") #不知道为什么要加这一句
+# print(sys.path)
 
 from easydict import EasyDict as edict
 from dataset.attribute import load_dataset
@@ -29,7 +32,7 @@ class Config:
     DATALOADER.SIZE_DIVISIBILITY = 0
 
     DATASET = edict()
-    DATASET.NAME = 'MPII'
+    DATASET.NAME = 'SELF'
     dataset = load_dataset(DATASET.NAME)
     DATASET.KEYPOINT = dataset.KEYPOINT
 
@@ -52,7 +55,7 @@ class Config:
 
     MODEL.DEVICE = 'cuda'
 
-    MODEL.WEIGHT = osp.join(ROOT_DIR, 'lib/models/resnet-50_rename.pth')
+    MODEL.WEIGHT = osp.join(ROOT_DIR, 'lib/models/mspn_2xstg_coco.pth')
 
     # -------- Training Config -------- #
     SOLVER = edict()

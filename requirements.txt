@@ -1,3 +1,4 @@
+torch
 ninja
 yacs
 cython
@@ -5,3 +6,6 @@ matplotlib
 tqdm
 coloredlogs
 tensorboardX
+easydict
+torchvision
+scipy

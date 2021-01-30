@@ -13,6 +13,7 @@ from cvpack.dataset import torch_samplers
 from dataset.attribute import load_dataset
 from dataset.COCO.coco import COCODataset
 from dataset.MPII.mpii import MPIIDataset
+from dataset.SELF.self import SELFDataset
 
 
 def get_train_loader(
@@ -25,6 +26,8 @@ def get_train_loader(
         Dataset = COCODataset 
     elif cfg.DATASET.NAME == 'MPII':
         Dataset = MPIIDataset
+    elif cfg.DATASET.NAME == 'SELF':
+        Dataset = SELFDataset
     dataset = Dataset(attr, 'train', transform)
 
     # -------- make samplers -------- #
@@ -58,7 +61,7 @@ def get_train_loader(
 
         def __call__(self, batch):
             transposed_batch = list(zip(*batch))
-            images = torch.stack(transposed_batch[0], dim=0)
+            images = torch.stack(transposed_batch[0], dim=0)   
             valids = torch.stack(transposed_batch[1], dim=0)
             labels = torch.stack(transposed_batch[2], dim=0)
 
@@ -81,6 +84,8 @@ def get_test_loader(cfg, num_gpu, local_rank, stage, is_dist=True):
         Dataset = COCODataset 
     elif cfg.DATASET.NAME == 'MPII':
         Dataset = MPIIDataset
+    elif cfg.DATASET.NAME == 'SELF':
+        Dataset = SELFDataset
     dataset = Dataset(attr, stage, transform)
 
     # -------- split dataset to gpus -------- #
