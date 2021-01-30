@@ -55,9 +55,20 @@ $MSPN_HOME
 |   |       |-- val2014
 |   |
 |   |-- MPII
-|       |-- det_json
-|       |-- gt_json
-|       |-- images
+|   |   |-- det_json
+|   |   |-- gt_json
+|   |   |-- images
+|   |
+|   |
+|   |-- SELF
+|   |   |-- det_json
+|   |   |-- gt_json
+|   |       |-- train.json
+|   |       |-- valid.json
+|   |
+|   |   |-- images
+|   |       |-- train
+|   |       |-- val
 |   
 |-- lib
 |   |-- models
@@ -116,6 +127,13 @@ $MSPN_HOME
 
 3. Download detection result from [Google Drive][6], and put it into **$MSPN_HOME/dataset/MPII/det_json/**.
 
+#### SELF DATASET
+
+1. Put self dataset into **$MSPN_HOME/dataset/SELF/images/**.
+
+2. Put self dataset json into **$MSPN_HOME/dataset/SELF/gt_json/** and **$MSPN_HOME/dataset/MPII/det_json/**.
+
+
 ### Model
 Download ImageNet pretained ResNet-50 model from [Google Drive][6], and put it into **$MSPN_HOME/lib/models/**. For your convenience, We also provide a well-trained 2-stage MSPN model for COCO.
 
@@ -128,7 +146,7 @@ mkdir $MSPN_HOME/model_logs
 ### Train
 Go to specified experiment repository, e.g.
 ```
-cd $MSPN_HOME/exps/mspn.2xstg.coco
+cd $MSPN_HOME/exps/mspn.2xstg.self
 ```
 and run:
 ```
