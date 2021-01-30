@@ -61,14 +61,14 @@ $MSPN_HOME
 |   |
 |   |
 |   |-- SELF
-|   |   |-- det_json
-|   |   |-- gt_json
-|   |   |   |-- train.json
-|   |   |   |-- valid.json
-|   |   |
-|   |   |-- images
-|   |       |-- train
-|   |       |-- val
+|       |-- det_json
+|       |-- gt_json
+|       |   |-- train.json
+|       |   |-- valid.json
+|       |
+|       |-- images
+|           |-- train
+|           |-- val
 |   
 |-- lib
 |   |-- models
