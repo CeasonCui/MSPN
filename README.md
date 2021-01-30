@@ -129,6 +129,9 @@ $MSPN_HOME
 
 #### SELF DATASET
 
+1. If your dataset use Labelme to mark the keypoint of body like coco, please run **labelme2coco.py** first.
+   (You should fix the code to adjust the keypoint label of your dataset)
+
 1. Put self dataset into **$MSPN_HOME/dataset/SELF/images/**.
 
 2. Put self dataset json into **$MSPN_HOME/dataset/SELF/gt_json/** and **$MSPN_HOME/dataset/MPII/det_json/**.
