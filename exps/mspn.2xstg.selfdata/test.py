@@ -1,3 +1,4 @@
+
 """
 @author: Wenbo Li
 @contact: fenglinglwb@gmail.com
@@ -8,6 +9,7 @@ import argparse
 from tqdm import tqdm
 import numpy as np
 import cv2
+import json
 
 import torch
 import torch.distributed as dist
@@ -20,15 +22,20 @@ from lib.utils.dataloader import get_test_loader
 from lib.utils.comm import is_main_process, synchronize, all_gather
 from lib.utils.transforms import flip_back
 
+from torchvision import transforms
+from PIL import Image
+import cv2
 
 def get_results(outputs, centers, scales, kernel=11, shifts=[0.25]):
-    scales *= 200
+    # scales *= 200
     nr_img = outputs.shape[0]
     preds = np.zeros((nr_img, cfg.DATASET.KEYPOINT.NUM, 2))
     maxvals = np.zeros((nr_img, cfg.DATASET.KEYPOINT.NUM, 1))
     for i in range(nr_img):
         score_map = outputs[i].copy()
+        
         score_map = score_map / 255 + 0.5
+        # print("socre_map: ", score_map)
         kps = np.zeros((cfg.DATASET.KEYPOINT.NUM, 2))
         scores = np.zeros((cfg.DATASET.KEYPOINT.NUM, 1))
         border = 10
@@ -59,6 +66,7 @@ def get_results(outputs, centers, scales, kernel=11, shifts=[0.25]):
             kps[w] = np.array([x * 4 + 2, y * 4 + 2])
             scores[w, 0] = score_map[w, int(round(y) + 1e-9), \
                     int(round(x) + 1e-9)]
+            # print("scores[w,0]: ",scores[w,0])
         # aligned or not ...
         kps[:, 0] = kps[:, 0] / cfg.INPUT_SHAPE[1] * scales[i][0] + \
                 centers[i][0] - scales[i][0] * 0.5
@@ -66,6 +74,9 @@ def get_results(outputs, centers, scales, kernel=11, shifts=[0.25]):
                 centers[i][1] - scales[i][1] * 0.5
         preds[i] = kps
         maxvals[i] = scores 
+        # print("scores: ",scores)
+        print("preds")
+        print(preds.shape)
     
     return preds, maxvals
 
@@ -74,13 +85,19 @@ def compute_on_dataset(model, data_loader, device):
     model.eval()
     results = list() 
     cpu_device = torch.device("cpu")
-
+    j=0
     data = tqdm(data_loader) if is_main_process() else data_loader
     for _, batch in enumerate(data):
         imgs, scores, centers, scales, img_ids = batch
-
+        j+=1
         imgs = imgs.to(device)
         with torch.no_grad():
+            # print(imgs[0])
+            # print(type(imgs[0]))
+            for b in range(len(imgs)):
+                new_img_PIL = transforms.ToPILImage()(imgs[b]).convert('RGB')
+                # print(type(new_img_PIL))
+                new_img_PIL.save("img_test"+str(b)+".png") # 处理后的PIL图片    
             outputs = model(imgs)
             outputs = outputs.to(cpu_device).numpy()
 
@@ -99,10 +116,21 @@ def compute_on_dataset(model, data_loader, device):
         preds, maxvals = get_results(outputs, centers, scales,
                 cfg.TEST.GAUSSIAN_KERNEL, cfg.TEST.SHIFT_RATIOS)
 
+        kp_scores = maxvals.squeeze().mean(axis=1)
         preds = np.concatenate((preds, maxvals), axis=2)
-        results.append(preds)
+        # print("maxvals", maxvals)
+        for i in range(preds.shape[0]):
+            keypoints = preds[i].reshape(-1).tolist()
+            # print("scores: ",scores)
+            score = scores[i] * kp_scores[i]
+            image_id = img_ids[i]
+            # print("score: ",score)
+            results.append(dict(image_id=image_id,
+                                category_id=1,
+                                keypoints=keypoints,
+                                score=score))
 
-    return results 
+    return results
 
 
 def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu, logger):
@@ -114,9 +142,8 @@ def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu, logger):
         return
 
     predictions = list()
-    for pred in all_predictions:
-        predictions.extend(pred)
-    predictions = np.vstack(predictions) 
+    for p in all_predictions:
+        predictions.extend(p)
     
     return predictions
 
@@ -160,7 +187,8 @@ def main():
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(cfg.MODEL.DEVICE)
 
-    model_file = os.path.join(cfg.OUTPUT_DIR, "iter-{}.pth".format(args.iter))
+    # model_file = os.path.join(cfg.OUTPUT_DIR, "iter-{}.pth".format(args.iter))
+    model_file = "/home/cui/MSPN/MSPN_HOME/lib/models/0207iter-140800.pth"
     if os.path.exists(model_file):
         state_dict = torch.load(
                 model_file, map_location=lambda storage, loc: storage)
@@ -174,10 +202,18 @@ def main():
     synchronize()
 
     if is_main_process():
+        logger.info("Dumping results ...")
+        print("results", len(results))
+        results.sort(
+                key=lambda res:(res['image_id'], res['score']), reverse=True) 
+        results_path = os.path.join(cfg.TEST_DIR, 'results.json')
+        with open(results_path, 'w') as f:
+            json.dump(results, f)
         logger.info("Get all results.")
 
-        data_loader.ori_dataset.evaluate(results)
+        data_loader.ori_dataset.evaluate(results_path)
 
 
 if __name__ == '__main__':
     main()
+

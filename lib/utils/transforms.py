@@ -10,8 +10,8 @@ import cv2
 def get_affine_transform(center, scale, rot, output_size):
     if not isinstance(scale, np.ndarray) and not isinstance(scale, list):
         scale = np.array([scale, scale])
-    scale_tmp = scale * 200.0
-
+    # scale_tmp = scale * 200.0
+    scale_tmp = scale
     src_w = scale_tmp[0]
     dst_w = output_size[1]
     dst_h = output_size[0]

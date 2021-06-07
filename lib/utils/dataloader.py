@@ -122,7 +122,7 @@ def get_test_loader(cfg, num_gpu, local_rank, stage, is_dist=True):
     data_loader = torch.utils.data.DataLoader(
             subset, num_workers=cfg.DATALOADER.NUM_WORKERS,
             batch_sampler=batch_sampler,
-            collate_fn=BatchCollator(cfg.DATALOADER.SIZE_DIVISIBILITY), )
+            collate_fn=BatchCollator(cfg.DATALOADER.SIZE_DIVISIBILITY))
     data_loader.ori_dataset = dataset
 
     return data_loader

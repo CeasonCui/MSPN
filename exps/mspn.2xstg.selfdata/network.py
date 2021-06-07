@@ -348,24 +348,29 @@ class MSPN(nn.Module):
 
                 if j < 3:
                     tmp_loss = tmp_loss / 4
-
+                # print("tmp_loss")
+                # print(tmp_loss)
                 loss += tmp_loss
+                # print("loss")
+                # print(loss)
 
         return dict(total_loss=loss)
         
     def forward(self, imgs, valids=None, labels=None):
+        print("img", imgs.shape)
         x = self.top(imgs)
+        print("x", x.shape)
         skip1 = None
         skip2 = None
         outputs = list()
         for i in range(self.stage_num):
-            res, skip1, skip2, x = eval('self.stage' + str(i))(x, skip1, skip2)
-            outputs.append(res)
+            res, skip1, skip2, x = eval('self.stage' + str(i))(x, skip1, skip2) #像是每个阶段都有个结果
+            outputs.append(res) # 大概是把每一层的输出都保存起来（2个）
 
         if valids is None and labels is None:
-            return outputs[-1][-1]
+            return outputs[-1][-1] #验证时只传回最后一层的结果
         else:
-            return self._calculate_loss(outputs, valids, labels)
+            return self._calculate_loss(outputs, valids, labels) #训练时传回损失
 
 
 

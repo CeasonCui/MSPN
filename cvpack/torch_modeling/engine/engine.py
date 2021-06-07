@@ -146,12 +146,12 @@ class Engine(object):
             self.state.model, loaded['model'], self.logger,
             is_restore=is_restore)
 
-        if "optimizer" in loaded:
-            self.state.optimizer.load_state_dict(loaded['optimizer'])
-        if "iteration" in loaded:
-            self.state.iteration = loaded['iteration']
-        if "scheduler" in loaded:
-            self.state.scheduler.load_state_dict(loaded["scheduler"])
+        # if "optimizer" in loaded:
+        #     self.state.optimizer.load_state_dict(loaded['optimizer'])
+        # if "iteration" in loaded:
+        #     self.state.iteration = loaded['iteration']
+        # if "scheduler" in loaded:
+        #     self.state.scheduler.load_state_dict(loaded["scheduler"])
         del loaded
 
         t_end = time.time()
